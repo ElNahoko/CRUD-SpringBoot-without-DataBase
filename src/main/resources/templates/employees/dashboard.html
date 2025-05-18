@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/main :: main(~{::div.content})}">
+<body>
+    <div class="content">
+        <h2 class="mb-4">
+            <i class="bi bi-speedometer2 text-primary me-2"></i>Employee Dashboard
+        </h2>
+
+        <!-- Quick Stats Section -->
+        <div class="row g-3 mb-4">
+            <!-- Total Employees Card -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card bg-gradient-primary">
+                    <div class="stat-card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="stat-content ms-3">
+                                <h3 class="stat-value" th:text="${employeeStats.totalCount}">0</h3>
+                                <p class="stat-label mb-0">Total Employees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Employees -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card bg-gradient-success">
+                    <div class="stat-card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-person-check-fill"></i>
+                            </div>
+                            <div class="stat-content ms-3">
+                                <h3 class="stat-value" th:text="${employeeStats.activeCount}">0</h3>
+                                <p class="stat-label mb-0">Active Employees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Salary -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card bg-gradient-warning">
+                    <div class="stat-card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-currency-exchange"></i>
+                            </div>
+                            <div class="stat-content ms-3">
+                                <h3 class="stat-value">
+                                    <span th:text="${#numbers.formatDecimal(employeeStats.averageSalary, 1, 2) + ' MAD'}">0 MAD</span>
+                                </h3>
+                                <p class="stat-label mb-0">Average Salary</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Departments -->
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card bg-gradient-info">
+                    <div class="stat-card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon">
+                                <i class="bi bi-diagram-3-fill"></i>
+                            </div>
+                            <div class="stat-content ms-3">
+                                <h3 class="stat-value" th:text="${employeeStats.departmentCount}">0</h3>
+                                <p class="stat-label mb-0">Departments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution and Salary Range -->
+        <div class="row g-4 mb-4">
+            <!-- Department Distribution -->
+            <div class="col-lg-6">
+                <div class="form-card h-100">
+                    <div class="form-card-header">
+                        <i class="bi bi-pie-chart-fill text-primary"></i>
+                        <h5>Department Distribution</h5>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                        <div class="department-legend mt-3">
+                            <div class="row g-2" th:if="${!#lists.isEmpty(employeeStats.departmentDistribution)}">
+                                <div class="col-md-6 col-lg-4" th:each="dept : ${employeeStats.departmentDistribution}">
+                                    <div class="legend-item">
+                                        <span class="legend-color" th:style="'background-color:' + ${dept.color}"></span>
+                                        <span class="legend-label" th:text="${dept.name}">Department</span>
+                                        <span class="legend-value ms-1" th:text="'(' + ${dept.count} + ')'">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(employeeStats.departmentDistribution)}" class="text-muted text-center py-5">
+                                <i class="bi bi-exclamation-circle fs-1 mb-3 d-block"></i>
+                                <p>No department data available.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Salary Range Distribution -->
+            <div class="col-lg-6">
+                <div class="form-card h-100">
+                    <div class="form-card-header">
+                        <i class="bi bi-bar-chart-fill text-primary"></i>
+                        <h5>Salary Distribution</h5>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="salaryChart"></canvas>
+                        </div>
+                        <div class="salary-stats d-flex justify-content-around mt-3 text-center">
+                            <div class="salary-stat-item">
+                                <h6 class="mb-1 text-primary">Max Salary</h6>
+                                <p class="mb-0 fw-bold" th:text="${#numbers.formatDecimal(employeeStats.maxSalary, 1, 2) + ' MAD'}">0 MAD</p>
+                            </div>
+                            <div class="salary-stat-item">
+                                <h6 class="mb-1 text-primary">Min Salary</h6>
+                                <p class="mb-0 fw-bold" th:text="${#numbers.formatDecimal(employeeStats.minSalary, 1, 2) + ' MAD'}">0 MAD</p>
+                            </div>
+                            <div class="salary-stat-item">
+                                <h6 class="mb-1 text-primary">Median</h6>
+                                <p class="mb-0 fw-bold" th:text="${#numbers.formatDecimal(employeeStats.medianSalary, 1, 2) + ' MAD'}">0 MAD</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Employee Activity and Position Distribution -->
+        <div class="row g-4">
+            <!-- Recent Employees -->
+            <div class="col-lg-8">
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <i class="bi bi-clock-history text-primary"></i>
+                        <h5>Recently Added Employees</h5>
+                    </div>
+                    <div class="form-card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Position</th>
+                                        <th>Department</th>
+                                        <th>Salary</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(recentEmployees)}">
+                                        <td colspan="5" class="text-center py-4">No recent employees added.</td>
+                                    </tr>
+                                    <tr th:each="employee : ${recentEmployees}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                                     style="width: 32px; height: 32px; font-weight: bold;" 
+                                                     th:text="${#strings.substring(employee.empName,0,1)}">J</div>
+                                                <span th:text="${employee.empName}">John Doe</span>
+                                            </div>
+                                        </td>
+                                        <td th:text="${employee.position ?: '-'}">Position</td>
+                                        <td>
+                                            <span class="badge bg-info text-dark" 
+                                                  th:if="${employee.department}" 
+                                                  th:text="${employee.department}">IT</span>
+                                            <span th:unless="${employee.department}">-</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success px-2 py-1">
+                                                <span th:text="${#numbers.formatDecimal(employee.empSal, 1, 2) + ' MAD'}">5000.00 MAD</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge" th:classappend="${employee.active ? 'status-badge-active' : 'status-badge-inactive'}">
+                                                <span class="status-indicator"></span>
+                                                <span th:text="${employee.active ? 'Active' : 'Inactive'}">Status</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-card-footer text-center py-2">
+                        <a th:href="@{/mvc/employees}" class="btn btn-sm btn-primary">View All Employees</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Distribution -->
+            <div class="col-lg-4">
+                <div class="form-card h-100">
+                    <div class="form-card-header">
+                        <i class="bi bi-briefcase-fill text-primary"></i>
+                        <h5>Positions Overview</h5>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="chart-container" style="position: relative; height: 200px;">
+                            <canvas id="positionChart"></canvas>
+                        </div>
+                        <div class="position-stats mt-3">
+                            <div th:if="${#lists.isEmpty(employeeStats.positionDistribution)}" class="text-muted text-center">
+                                <p>No position data available.</p>
+                            </div>
+                            <ul class="list-group list-group-flush" th:if="${!#lists.isEmpty(employeeStats.positionDistribution)}">
+                                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="pos : ${employeeStats.positionDistribution}">
+                                    <span th:text="${pos.name}">Position</span>
+                                    <span class="badge rounded-pill bg-primary" th:text="${pos.count}">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart.js Script -->
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                // Department chart data
+                const departmentData = /*[[${employeeStats.departmentDistribution}]]*/ [];
+                if(departmentData && departmentData.length > 0) {
+                    const deptCtx = document.getElementById('departmentChart').getContext('2d');
+                    new Chart(deptCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: departmentData.map(item => item.name),
+                            datasets: [{
+                                data: departmentData.map(item => item.count),
+                                backgroundColor: departmentData.map(item => item.color),
+                                borderWidth: 1,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Salary chart data
+                const salaryData = /*[[${employeeStats.salaryRanges}]]*/ [];
+                if(salaryData && salaryData.length > 0) {
+                    const salaryCtx = document.getElementById('salaryChart').getContext('2d');
+                    new Chart(salaryCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: salaryData.map(item => item.range),
+                            datasets: [{
+                                label: 'Employees',
+                                data: salaryData.map(item => item.count),
+                                backgroundColor: '#4361ee',
+                                borderColor: '#3f37c9',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Position chart
+                const positionData = /*[[${employeeStats.positionDistribution}]]*/ [];
+                if(positionData && positionData.length > 0) {
+                    const posCtx = document.getElementById('positionChart').getContext('2d');
+                    new Chart(posCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: positionData.map(item => item.name),
+                            datasets: [{
+                                data: positionData.map(item => item.count),
+                                backgroundColor: [
+                                    '#4361ee', '#f72585', '#06d6a0', '#ffd166', '#7209b7',
+                                    '#3a86ff', '#fb5607', '#8ac926', '#023e8a', '#9d4edd'
+                                ],
+                                borderWidth: 1,
+                                borderColor: '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 12
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
