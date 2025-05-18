@@ -60,6 +60,14 @@ body {
     padding: 1rem;
 }
 
+/* Footer styling - matching the header */
+footer {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    box-shadow: var(--box-shadow);
+    color: var(--bg-white);
+    padding: 1.5rem 0;
+}
+
 /* Navbar styling - more modern and elegant */
 .navbar {
     box-shadow: var(--box-shadow);

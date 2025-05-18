@@ -45,7 +45,7 @@ public class EmployeeModel {
         this.address = address;
         this.active = active;
     }
-    
+
     // This internal setter method can be used by the repository
     // but we'll also use the regular setter for form binding
     public void _internalSetEmpId(Integer empId) {
